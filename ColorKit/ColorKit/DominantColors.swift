@@ -138,6 +138,14 @@ extension UIImage {
         guard let data = CFDataGetBytePtr(cfData) else {
             throw ImageColorError.cgImageDataFailure
         }
+
+        // Assuming the pixel data is in RGBA format, thus having 4 components per pixel.
+        let bytesPerPixel = 4
+        let width = cgImage.width
+        let height = cgImage.height
+        let bytesPerRow = cgImage.bytesPerRow
+        let totalBytes = height * bytesPerRow
+
         
         // ------
         // Step 2: Add each pixel to a NSCountedSet. This will give us a count for each color.
@@ -154,6 +162,9 @@ extension UIImage {
         for yCoordonate in 0 ..< cgImage.height {
             for xCoordonate in 0 ..< cgImage.width {
                 let index = (cgImage.width * yCoordonate + xCoordonate) * 4
+
+                // Check if the index is within the bounds of the data
+                guard index + 3 < totalBytes else { continue }
                 
                 // Let's make sure there is enough alpha.
                 guard data[index + 3] > 150 else { continue }
